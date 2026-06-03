@@ -1,5 +1,4 @@
 [project]
-name = "proptech-booking-saas"
 version = "0.1.0"
 description = "Backend for PropTech Booking SaaS"
 readme = "README.md"
