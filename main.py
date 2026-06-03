@@ -31,3 +31,8 @@ app.include_router(leads_router, prefix=settings.API_V1_STR)
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "project": settings.PROJECT_NAME}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
