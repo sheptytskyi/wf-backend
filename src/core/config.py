@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str = "8972361768:AAEaWf1gpXMPYWFnBuJ5OBBApzDZWjmh6Bo"
     TELEGRAM_CHAT_ID: str = "848484880"
 
+    TELEGRAM_BOT_TOKEN_44: str = "8191568700:AAGItgeeVjniKYcPRxBO36aLD80cCoNk7h8"
+    TELEGRAM_CHAT_ID_44: str = "848484880"
+
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 settings = Settings()

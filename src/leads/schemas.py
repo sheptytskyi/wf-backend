@@ -1,14 +1,10 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Literal, Optional
 
-
-class LeadContactRequest(BaseModel):
+class LeadBaseContactForm(BaseModel):
     # ── Core form fields ──────────────────────────────────────────────────────
     name: str
-    phone: str
     email: EmailStr
-    viewings_per_week: Literal["1-10", "11-30", "31-50", "50+"]
-    agent_type: Literal["solo", "agency"]
 
     # ── UTM parameters ────────────────────────────────────────────────────────
     utm_source: Optional[str] = None
@@ -30,6 +26,12 @@ class LeadContactRequest(BaseModel):
             raise ValueError("Name must not be empty")
         return v
 
+
+class LeadContactRequest(LeadBaseContactForm):
+    phone: str
+    viewings_per_week: Literal["1-10", "11-30", "31-50", "50+"]
+    agent_type: Literal["solo", "agency"]
+
     @field_validator("phone")
     @classmethod
     def phone_must_not_be_empty(cls, v: str) -> str:
@@ -38,6 +40,11 @@ class LeadContactRequest(BaseModel):
             raise ValueError("Phone must not be empty")
         return v
 
+
+class Lead44ContactRequest(LeadBaseContactForm):
+    project_type: str = Field(alias='projectType')
+    budget: str
+    message: str
 
 class LeadContactResponse(BaseModel):
     success: bool

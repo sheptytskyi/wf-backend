@@ -4,7 +4,7 @@ from datetime import datetime, UTC
 import httpx
 
 from src.core.config import settings
-from src.leads.schemas import LeadContactRequest
+from src.leads.schemas import Lead44ContactRequest, LeadContactRequest
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,52 @@ def _build_message(lead: LeadContactRequest) -> str:
     return "\n".join(lines)
 
 
+def _build_44_message(lead: Lead44ContactRequest) -> str:
+    utc_time = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    # ── Core contact info ─────────────────────────────────────────────────────
+    lines = [
+        "🏠 <b>New 44fingers contact form lead</b>",
+        "",
+        f"🕒 <b>Submitted:</b> {utc_time}",
+        f"👤 <b>Name:</b> {lead.name}",
+        f"📧 <b>Email:</b> {lead.email}",
+        f"📍 <b>Project type:</b> {lead.project_type}",
+        f"💰 <b>Budget range:</b> {lead.budget}",
+        f"",
+        f"💌 <b>Message:</b> {lead.message}",
+    ]
+
+    # ── UTM attribution block (only shown if at least one field is present) ───
+    has_utm = any([
+        lead.utm_source, lead.utm_medium, lead.utm_campaign,
+        lead.utm_content, lead.utm_term,
+    ])
+    if has_utm:
+        lines += [
+            "",
+            "📊 <b>UTM Attribution</b>",
+            f"  • Source:   {_fmt(lead.utm_source)}",
+            f"  • Medium:   {_fmt(lead.utm_medium)}",
+            f"  • Campaign: {_fmt(lead.utm_campaign)}",
+            f"  • Content:  {_fmt(lead.utm_content)}",
+            f"  • Term:     {_fmt(lead.utm_term)}",
+        ]
+
+    # ── Meta / Facebook identifiers (only shown if present) ───────────────────
+    has_meta = any([lead.fbclid, lead.fbp, lead.fbc])
+    if has_meta:
+        lines += [
+            "",
+            "🎯 <b>Meta Identifiers</b>",
+            f"  • fbclid: {_fmt(lead.fbclid)}",
+            f"  • fbp:    {_fmt(lead.fbp)}",
+            f"  • fbc:    {_fmt(lead.fbc)}",
+        ]
+    
+    return "\n".join(lines)
+
+
 async def send_lead_to_telegram(lead: LeadContactRequest) -> bool:
     """
     Send the lead contact data as a formatted Telegram message.
@@ -80,6 +126,45 @@ async def send_lead_to_telegram(lead: LeadContactRequest) -> bool:
     payload = {
         "chat_id": chat_id,
         "text": _build_message(lead),
+        "parse_mode": "HTML",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.post(url, json=payload)
+            response.raise_for_status()
+            logger.info("Telegram notification sent for lead: %s", lead.email)
+            return True
+    except httpx.HTTPStatusError as exc:
+        logger.error(
+            "Telegram API returned error %s: %s",
+            exc.response.status_code,
+            exc.response.text,
+        )
+    except httpx.RequestError as exc:
+        logger.error("Failed to reach Telegram API: %s", exc)
+
+    return False
+
+
+async def send_44_lead_to_telegram(lead: Lead44ContactRequest) -> bool:
+    """
+    Send the lead contact data as a formatted Telegram message.
+    Returns True on success, False if Telegram is mis-configured or the call fails.
+    """
+    token = settings.TELEGRAM_BOT_TOKEN_44
+    chat_id = settings.TELEGRAM_CHAT_ID_44
+
+    if not token or not chat_id:
+        logger.warning(
+            "Telegram notification skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not configured."
+        )
+        return False
+
+    url = TELEGRAM_API_URL.format(token=token)
+    payload = {
+        "chat_id": chat_id,
+        "text": _build_44_message(lead),
         "parse_mode": "HTML",
     }
 
