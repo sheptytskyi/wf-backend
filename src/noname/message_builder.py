@@ -27,7 +27,7 @@ class TelegramMessageBuilder:
 
         lines.extend(
             [
-                "🚀 <b>Нова заявка з сайту</b>",
+                "🚀 <b>Нова заявка 🟠 TUTSVOI 🟠</b>",
                 "",
                 "👤 <b>Контактна інформація</b>",
             ]
@@ -198,7 +198,7 @@ class TelegramMessageBuilder:
     @classmethod
     def build_calculator(cls, request: PriceCalculatorLead) -> str:
         lines: list[str] = [
-            "🧮 <b>Нова заявка з калькулятора цін</b>",
+            "🧮 <b>🟠TUTSVOI🟠 Нова заявка з калькулятора цін</b>",
             "",
         ]
 
