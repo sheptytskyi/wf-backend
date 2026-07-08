@@ -1,6 +1,6 @@
 from typing import Any
 
-from src.noname.schema import ProjectRequest
+from src.noname.schema import PriceCalculatorLead, ProjectRequest
 
 
 class TelegramMessageBuilder:
@@ -192,5 +192,33 @@ class TelegramMessageBuilder:
                     request.business_impact,
                 ]
             )
+
+        return "\n".join(lines)
+
+    @classmethod
+    def build_calculator(cls, request: PriceCalculatorLead) -> str:
+        lines: list[str] = [
+            "🧮 <b>Нова заявка з калькулятора цін</b>",
+            "",
+        ]
+
+        cls.add_field(lines, "Тип проєкту", request.project_type)
+        cls.add_field(lines, "Формат оплати", request.payment_format)
+        cls.add_field(lines, "Орієнтовна ціна", request.estimated_price)
+        cls.add_field(lines, "Орієнтовний термін", request.estimated_time)
+
+        if request.features:
+            lines.extend(["", "🛠 <b>Фічі</b>"])
+            for feature in request.features:
+                lines.append(f"• {feature}")
+
+        lines.extend(
+            [
+                "",
+                "👤 <b>Контактна інформація</b>",
+            ]
+        )
+        cls.add_field(lines, "Ім'я", request.full_name)
+        cls.add_field(lines, "Контакт", request.contact)
 
         return "\n".join(lines)

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 def to_camel(string: str) -> str:
@@ -100,3 +100,14 @@ class ProjectRequest(BaseSchema):
     telegram: Optional[str] = None
     phone: Optional[str] = None
     preferred_contact_method: str
+
+
+class PriceCalculatorLead(BaseSchema):
+    source: str = "price-calculator"
+    project_type: str
+    features: list[str] = Field(default_factory=list)
+    payment_format: str
+    estimated_price: str
+    estimated_time: str
+    full_name: str
+    contact: str
